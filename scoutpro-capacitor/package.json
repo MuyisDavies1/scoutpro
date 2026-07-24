@@ -1,0 +1,53 @@
+{
+  "name": "scoutpro",
+  "version": "1.0.0",
+  "description": "ScoutPro — FIFA-Licensed Football Scouting Platform (Capacitor mobile wrapper)",
+  "private": true,
+  "scripts": {
+    "sync":        "npx cap sync",
+    "open:ios":    "npx cap open ios",
+    "open:android":"npx cap open android",
+    "run:ios":     "npx cap run ios",
+    "run:android": "npx cap run android",
+    "build:ios":   "npx cap build ios",
+    "build:android":"npx cap build android",
+    "update":      "npx cap update",
+    "doctor":      "npx cap doctor",
+    "lint":        "echo 'No lint step required for static app'"
+  },
+  "dependencies": {
+    "@capacitor/core":                "^6.0.0",
+    "@capacitor/ios":                 "^6.0.0",
+    "@capacitor/android":             "^6.0.0",
+    "@capacitor/splash-screen":       "^6.0.0",
+    "@capacitor/status-bar":          "^6.0.0",
+    "@capacitor/keyboard":            "^6.0.0",
+    "@capacitor/local-notifications": "^6.0.0",
+    "@capacitor/push-notifications":  "^6.0.0",
+    "@capacitor/preferences":         "^6.0.0",
+    "@capacitor/share":               "^6.0.0",
+    "@capacitor/clipboard":           "^6.0.0",
+    "@capacitor/browser":             "^6.0.0",
+    "@capacitor/haptics":             "^6.0.0",
+    "@capacitor/network":             "^6.0.0",
+    "@capacitor/app":                 "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli":    "^6.0.0",
+    "typescript":        "^5.4.0"
+  },
+  "keywords": [
+    "football",
+    "scouting",
+    "capacitor",
+    "ios",
+    "android",
+    "sports-tech"
+  ],
+  "author": "ScoutPro",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm":  ">=9.0.0"
+  }
+}

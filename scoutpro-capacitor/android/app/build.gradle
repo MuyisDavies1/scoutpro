@@ -1,0 +1,77 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  ScoutPro — Android App-level build.gradle                              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.scoutpro.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId   "com.scoutpro.app"
+        minSdk          26          // Android 8.0 Oreo  (covers 98% of active devices)
+        targetSdk       34          // Android 14        (required for Play Store from Aug 2024)
+        versionCode     1           // increment by 1 for every Play Store upload
+        versionName     "1.0.0"     // semantic version shown to users
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // ── Signing Configurations ───────────────────────────────────────────────
+    // Run: keytool -genkey -v -keystore scoutpro-release.jks -alias scoutpro
+    //             -keyalg RSA -keysize 2048 -validity 10000
+    // Then fill the values below (or move to gradle.properties for safety):
+    signingConfigs {
+        release {
+            storeFile     file(project.findProperty("KEYSTORE_PATH")     ?: "scoutpro-release.jks")
+            storePassword       project.findProperty("KEYSTORE_PASSWORD") ?: "REPLACE_ME"
+            keyAlias            project.findProperty("KEY_ALIAS")         ?: "scoutpro"
+            keyPassword         project.findProperty("KEY_PASSWORD")      ?: "REPLACE_ME"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig       signingConfigs.release
+            minifyEnabled       false   // set true + configure ProGuard when ready
+            shrinkResources     false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix   "-debug"
+            debuggable          true
+        }
+    }
+
+    // ── Build Features ────────────────────────────────────────────────────────
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    // ── Bundle (AAB) for Play Store — preferred over APK ─────────────────────
+    bundle {
+        language      { enableSplit = true }
+        density       { enableSplit = true }
+        abi           { enableSplit = true }
+    }
+}
+
+dependencies {
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
+    implementation "androidx.core:core-splashscreen:1.0.1"
+
+    // Capacitor core
+    implementation project(':capacitor-android')
+}

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  ScoutPro — iOS Info.plist                                              ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+  After running `npx cap add ios`, merge these keys into the generated plist
+  or let Capacitor auto-fill many of them via capacitor.config.ts.
+-->
+<plist version="1.0">
+<dict>
+
+    <!-- ── App Identity ──────────────────────────────────────────────── -->
+    <key>CFBundleDisplayName</key>
+    <string>ScoutPro</string>
+    <key>CFBundleName</key>
+    <string>ScoutPro</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.scoutpro.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+
+    <!-- ── Minimum iOS version ───────────────────────────────────────── -->
+    <key>MinimumOSVersion</key>
+    <string>14.0</string>
+
+    <!-- ── Orientation support ──────────────────────────────────────── -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- ── Status bar ───────────────────────────────────────────────── -->
+    <key>UIStatusBarHidden</key>
+    <false/>
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleLightContent</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+
+    <!-- ── App Transport Security ───────────────────────────────────── -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+        <!-- Remove the following key before App Store submission -->
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>localhost</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+
+    <!-- ── Privacy Usage Descriptions (required by App Store review) ── -->
+    <key>NSCameraUsageDescription</key>
+    <string>ScoutPro uses the camera to capture player photos for scouting profiles.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>ScoutPro accesses your photo library to attach player images to profiles.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>ScoutPro may save exported scouting reports to your photo library.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ScoutPro uses the microphone for video evaluation recording.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>ScoutPro uses Face ID to securely authenticate your agent account.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>ScoutPro can import club contact details from your address book.</string>
+
+    <!-- ── Deep Links / URL Schemes ─────────────────────────────────── -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>scoutpro</string>
+            </array>
+            <key>CFBundleURLName</key>
+            <string>com.scoutpro.app</string>
+        </dict>
+    </array>
+
+    <!-- ── Background Modes ──────────────────────────────────────────── -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+        <string>fetch</string>
+    </array>
+
+    <!-- ── Capacitor Bridge ──────────────────────────────────────────── -->
+    <key>WKAppBoundDomains</key>
+    <array>
+        <string>bzu6wxst.scispace.co</string>
+    </array>
+
+    <!-- ── Scene Manifest (required for iOS 13+) ────────────────────── -->
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+        <key>UISceneConfigurations</key>
+        <dict>
+            <key>UIWindowSceneSessionRoleApplication</key>
+            <array>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>Default Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
+
+    <!-- ── Launch Screen ────────────────────────────────────────────── -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+
+    <!-- ── Main Interface ───────────────────────────────────────────── -->
+    <key>NSPrincipalClass</key>
+    <string>UIApplication</string>
+
+</dict>
+</plist>

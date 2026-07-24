@@ -1,0 +1,31 @@
+node_modules/
+.npm/
+*.jks
+*.keystore
+*.p12
+*.cer
+*.mobileprovision
+gradle.properties
+local.properties
+.env
+.env.*
+*.log
+
+# iOS build outputs
+ios/App/build/
+ios/App/Pods/
+ios/App/*.xcarchive
+ios/App/App.xcworkspace/xcuserdata/
+DerivedData/
+
+# Android build outputs
+android/.gradle/
+android/app/build/
+android/app/release/
+android/build/
+*.aab
+*.apk
+
+# Capacitor temp
+.cap_tmp/
+dist/

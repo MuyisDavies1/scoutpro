@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScoutPro – FIFA-Licensed Football Scouting Platform</title>
+  <meta name="description" content="Professional football scouting platform for FIFA-licensed agents. Player management, evaluations, reports and club outreach."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --accent: #e8b84b;
+      --dark: #0a1628;
+      --surface: #111827;
+      --card: #1f2937;
+      --border: #374151;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--dark); color: var(--text); overflow-x: hidden; }
+    .sidebar { width: 260px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
+    .sidebar.collapsed { transform: translateX(-260px); }
+    .main-content { margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s; }
+    .main-content.expanded { margin-left: 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; border-radius: 8px; margin: 2px 8px; transition: all 0.2s; color: var(--muted); font-size: 14px; }
+    .nav-item:hover, .nav-item.active { background: rgba(15,76,129,0.3); color: var(--accent); }
+    .nav-item.active { border-left: 3px solid var(--accent); }
+    .page { display: none; padding: 24px; }
+    .page.active { display: block; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .btn-primary { background: var(--primary); color: white; padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .btn-primary:hover { background: #1a5fa3; }
+    .btn-accent { background: var(--accent); color: #0a1628; padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+    .btn-accent:hover { background: #d4a43a; }
+    .btn-danger { background: #dc2626; color: white; padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; }
+    .btn-success { background: #16a34a; color: white; padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; }
+    .input-field { background: #374151; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 14px; width: 100%; outline: none; }
+    .input-field:focus { border-color: var(--accent); }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-elite { background: #7c3aed; color: white; }
+    .badge-prospect { background: #2563eb; color: white; }
+    .badge-development { background: #d97706; color: white; }
+    .badge-monitor { background: #6b7280; color: white; }
+    .tier-bar { height: 6px; border-radius: 3px; background: #374151; }
+    .tier-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; align-items: center; justify-content: center; }
+    .modal.open { display: flex; }
+    .modal-box { background: var(--card); border-radius: 16px; padding: 28px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+    .tab-btn { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); border: 1px solid transparent; transition: all 0.2s; }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .sheet-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .sheet-table th { background: #1e3a5f; color: var(--accent); padding: 10px 14px; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+    .sheet-table td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: middle; }
+    .sheet-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .score-input { width: 70px; background: #374151; border: 1px solid var(--border); color: white; padding: 4px 8px; border-radius: 4px; text-align: center; }
+    .radar-wrap { position: relative; max-height: 320px; }
+    .progress-ring { width: 80px; height: 80px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+    .player-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .player-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .club-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: all 0.2s; }
+    .club-card:hover { border-color: var(--accent); }
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0a1628 0%, #0f2444 50%, #0a1628 100%); }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; } .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-260px); } .sidebar.mobile-open { transform: translateX(0); } .main-content { margin-left: 0; } }
+    .print-report { display: none; }
+    @media print { .print-report { display: block; } .no-print { display: none !important; } }
+    .tooltip { position: relative; }
+    .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; z-index: 99; border: 1px solid var(--border); }
+    select option { background: #1f2937; color: white; }
+  </style>
+</head>
+<body>
+
+<!-- ====== LOGIN SCREEN ====== -->
+<div id="loginScreen" class="login-screen">
+  <div style="width:420px;" class="card text-center">
+    <div class="mb-6">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#0f4c81,#e8b84b);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="fas fa-futbol text-white text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-white">ScoutPro</h1>
+      <p class="text-sm mt-1" style="color:var(--muted)">FIFA-Licensed Football Scouting Platform</p>
+    </div>
+    <div class="mb-4">
+      <input id="loginEmail" type="email" class="input-field mb-3" placeholder="Email address" value="admin@scoutpro.com"/>
+      <input id="loginPassword" type="password" class="input-field mb-3" placeholder="Password" value="admin123"/>
+      <select id="loginRole" class="input-field mb-4">
+        <option value="Admin">Admin (Agent)</option>
+        <option value="Scout">Scout</option>
+        <option value="Analyst">Analyst</option>
+        <option value="ClubViewer">Club Viewer</option>
+      </select>
+      <button class="btn-accent w-full py-3 text-base font-bold rounded-lg" onclick="doLogin()">
+        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+      </button>
+    </div>
+    <p class="text-xs mt-4" style="color:var(--muted)">Demo: admin@scoutpro.com / admin123</p>
+    <div class="mt-3 flex gap-2 justify-center flex-wrap">
+      <span class="badge badge-elite">Admin</span>
+      <span class="badge badge-prospect">Scout</span>
+      <span class="badge badge-development">Analyst</span>
+      <span class="badge badge-monitor">Club Viewer</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MAIN APP ====== -->
+<div id="appShell" style="display:none;">
+
+<!-- Sidebar -->
+<aside class="sidebar scrollbar-thin" id="sidebar">
+  <div style="padding:20px 16px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:38px;height:38px;background:linear-gradient(135deg,#0f4c81,#e8b84b);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-futbol text-white text-sm"></i>
+      </div>
+      <div>
+        <div class="font-bold text-white text-sm">ScoutPro</div>
+        <div style="font-size:10px;color:var(--muted)" id="sidebarRole">Admin</div>
+      </div>
+    </div>
+  </div>
+  <nav style="padding:12px 0;" id="sidebarNav">
+    <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard"><i class="fas fa-th-large w-4"></i><span>Dashboard</span></div>
+    <div class="nav-item" onclick="showPage('players')" data-page="players"><i class="fas fa-users w-4"></i><span>Players</span></div>
+    <div class="nav-item" onclick="showPage('evaluation')" data-page="evaluation"><i class="fas fa-clipboard-check w-4"></i><span>Evaluations</span></div>
+    <div class="nav-item" onclick="showPage('spreadsheet')" data-page="spreadsheet"><i class="fas fa-table w-4"></i><span>Scoring Sheets</span></div>
+    <div class="nav-item" onclick="showPage('reports')" data-page="reports"><i class="fas fa-file-alt w-4"></i><span>Scout Reports</span></div>
+    <div class="nav-item" onclick="showPage('clubs')" data-page="clubs"><i class="fas fa-shield-alt w-4"></i><span>Club Channel</span></div>
+    <div class="nav-item" onclick="showPage('outreach')" data-page="outreach"><i class="fas fa-envelope w-4"></i><span>Club Outreach</span></div>
+    <div class="nav-item" onclick="showPage('profile')" data-page="profile"><i class="fas fa-id-card w-4"></i><span>Player Profile</span></div>
+    <div style="padding:8px 20px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">Account</div>
+    <div class="nav-item" onclick="doLogout()"><i class="fas fa-sign-out-alt w-4"></i><span>Logout</span></div>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content" id="mainContent">
+  <!-- Top Bar -->
+  <header style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;" class="no-print">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button onclick="toggleSidebar()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;"><i class="fas fa-bars"></i></button>
+      <h2 id="pageTitle" class="text-white font-semibold text-lg">Dashboard</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span style="font-size:13px;color:var(--muted);" id="headerUser">Admin</span>
+      <div style="width:34px;height:34px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-user text-white text-sm"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== DASHBOARD PAGE ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card">
+        <div style="font-size:28px;font-weight:700;color:var(--accent);" id="statTotal">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Total Players</div>
+        <i class="fas fa-users mt-2" style="color:var(--primary);font-size:20px;"></i>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:28px;font-weight:700;color:#7c3aed;" id="statElite">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Elite Prospects</div>
+        <i class="fas fa-star mt-2" style="color:#7c3aed;font-size:20px;"></i>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:28px;font-weight:700;color:#2563eb;" id="statEvals">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Evaluations</div>
+        <i class="fas fa-clipboard-check mt-2" style="color:#2563eb;font-size:20px;"></i>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:28px;font-weight:700;color:#16a34a;" id="statClubs">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Clubs in Channel</div>
+        <i class="fas fa-shield-alt mt-2" style="color:#16a34a;font-size:20px;"></i>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-chart-pie mr-2"></i>Player Tier Distribution</h3>
+        <div style="max-height:260px;position:relative;"><canvas id="tierChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-trophy mr-2"></i>Top Prospects</h3>
+        <div id="topProspects"></div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-chart-bar mr-2"></i>Score Distribution</h3>
+        <div style="max-height:220px;position:relative;"><canvas id="scoreDistChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-globe mr-2"></i>Players by Nationality</h3>
+        <div id="nationalityList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PLAYERS PAGE ===== -->
+  <div id="page-players" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="playerSearch" type="text" class="input-field" style="width:220px;" placeholder="Search players..." oninput="renderPlayers()"/>
+        <select id="playerFilter" class="input-field" style="width:160px;" onchange="renderPlayers()">
+          <option value="">All Positions</option>
+          <option>Goalkeeper</option><option>Centre-Back</option><option>Full-Back</option>
+          <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
+          <option>Winger</option><option>Striker</option>
+        </select>
+      </div>
+      <button class="btn-accent" onclick="openAddPlayer()"><i class="fas fa-plus mr-2"></i>Add Player</button>
+    </div>
+    <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
+
+  <!-- ===== EVALUATION PAGE ===== -->
+  <div id="page-evaluation" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="text-lg font-semibold">Scouting Evaluations</h3>
+      <button class="btn-accent" onclick="openNewEval()"><i class="fas fa-plus mr-2"></i>New Evaluation</button>
+    </div>
+    <div id="evalList"></div>
+  </div>
+
+  <!-- ===== SPREADSHEET PAGE ===== -->
+  <div id="page-spreadsheet" class="page">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="sheetTabs">
+      <button class="tab-btn active" onclick="showSheet('dashboard','sheetTabs')">Player Dashboard</button>
+      <button class="tab-btn" onclick="showSheet('technical','sheetTabs')">Technical KPIs</button>
+      <button class="tab-btn" onclick="showSheet('tactical','sheetTabs')">Tactical KPIs</button>
+      <button class="tab-btn" onclick="showSheet('physical','sheetTabs')">Physical KPIs</button>
+      <button class="tab-btn" onclick="showSheet('psychological','sheetTabs')">Psychological KPIs</button>
+      <button class="tab-btn" onclick="showSheet('archetype','sheetTabs')">Archetype KPIs</button>
+      <button class="tab-btn" onclick="showSheet('percentile','sheetTabs')">Percentile Rankings</button>
+      <button class="tab-btn" onclick="showSheet('finalmodel','sheetTabs')">Final Scoring Model</button>
+    </div>
+    <div id="sheetContent"></div>
+  </div>
+
+  <!-- ===== REPORTS PAGE ===== -->
+  <div id="page-reports" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="text-lg font-semibold">Scouting Reports</h3>
+      <button class="btn-accent" onclick="openGenerateReport()"><i class="fas fa-file-pdf mr-2"></i>Generate Report</button>
+    </div>
+    <div id="reportView"></div>
+  </div>
+
+  <!-- ===== CLUBS PAGE ===== -->
+  <div id="page-clubs" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="clubSearch" type="text" class="input-field" style="width:220px;" placeholder="Search clubs..." oninput="renderClubs()"/>
+        <select id="clubCountryFilter" class="input-field" style="width:160px;" onchange="renderClubs()">
+          <option value="">All Countries</option>
+        </select>
+        <select id="clubStyleFilter" class="input-field" style="width:160px;" onchange="renderClubs()">
+          <option value="">All Styles</option>
+          <option>High Press</option><option>Possession</option><option>Counter-Attack</option>
+          <option>Direct Play</option><option>Hybrid</option>
+        </select>
+      </div>
+      <button class="btn-accent" onclick="openAddClub()"><i class="fas fa-plus mr-2"></i>Add Club</button>
+    </div>
+    <div id="clubsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
+
+  <!-- ===== OUTREACH PAGE ===== -->
+  <div id="page-outreach" class="page">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-paper-plane mr-2"></i>Generate Outreach Email</h3>
+        <div class="mb-3">
+          <label class="text-sm mb-1 block" style="color:var(--muted)">Select Player</label>
+          <select id="outreachPlayer" class="input-field" onchange="generateEmail()"></select>
+        </div>
+        <div class="mb-3">
+          <label class="text-sm mb-1 block" style="color:var(--muted)">Select Club</label>
+          <select id="outreachClub" class="input-field" onchange="generateEmail()"></select>
+        </div>
+        <div class="mb-3">
+          <label class="text-sm mb-1 block" style="color:var(--muted)">Email Template</label>
+          <select id="emailTemplate" class="input-field" onchange="generateEmail()">
+            <option value="intro">Introduction & Player Presentation</option>
+            <option value="trial">Trial Request</option>
+            <option value="followup">Follow-Up</option>
+            <option value="report">Scouting Report Submission</option>
+          </select>
+        </div>
+        <button class="btn-primary w-full mt-2" onclick="generateEmail()"><i class="fas fa-magic mr-2"></i>Generate Email</button>
+        <button class="btn-accent w-full mt-2" onclick="copyEmail()"><i class="fas fa-copy mr-2"></i>Copy Email</button>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-envelope-open-text mr-2"></i>Email Preview</h3>
+        <div id="emailPreview" style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;min-height:320px;white-space:pre-wrap;color:#e2e8f0;"></div>
+      </div>
+    </div>
+    <div class="card mt-6">
+      <h3 class="font-semibold mb-4" style="color:var(--accent)"><i class="fas fa-history mr-2"></i>Outreach Tracker</h3>
+      <div id="outreachTracker"></div>
+    </div>
+  </div>
+
+  <!-- ===== PLAYER PROFILE PAGE ===== -->
+  <div id="page-profile" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="text-lg font-semibold">Player Profile</h3>
+      <select id="profilePlayerSelect" class="input-field" style="width:220px;" onchange="renderProfile()"></select>
+    </div>
+    <div id="profileContent"></div>
+  </div>
+
+</div><!-- end main-content -->
+</div><!-- end appShell -->
+
+<!-- ====== MODALS ====== -->
+<!-- Add Player Modal -->
+<div class="modal" id="addPlayerModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="font-bold text-lg" style="color:var(--accent)">Add New Player</h3>
+      <button onclick="closeModal('addPlayerModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;">&times;</button>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Full Name *</label><input id="pName" class="input-field" placeholder="Player name"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Date of Birth *</label><input id="pDOB" type="date" class="input-field"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Nationality</label><input id="pNat" class="input-field" placeholder="Nationality"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Height (cm)</label><input id="pHeight" type="number" class="input-field" placeholder="180"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Weight (kg)</label><input id="pWeight" type="number" class="input-field" placeholder="75"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Dominant Foot</label>
+        <select id="pFoot" class="input-field"><option>Right</option><option>Left</option><option>Both</option></select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Position *</label>
+        <select id="pPosition" class="input-field">
+          <option>Goalkeeper</option><option>Centre-Back</option><option>Full-Back</option>
+          <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
+          <option>Winger</option><option>Striker</option>
+        </select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Archetype</label>
+        <select id="pArchetype" class="input-field">
+          <option>Ball-Playing Defender</option><option>Aggressive Stopper</option><option>Sweeper Keeper</option>
+          <option>Box-to-Box Midfielder</option><option>Deep-Lying Playmaker</option><option>Advanced Playmaker</option>
+          <option>Pressing Forward</option><option>Target Striker</option><option>Inverted Winger</option>
+          <option>Overlapping Full-Back</option><option>Holding Midfielder</option>
+        </select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Current Club</label><input id="pClub" class="input-field" placeholder="Club name"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Profile Image URL</label><input id="pImage" class="input-field" placeholder="https://..."/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Highlight Video URL</label><input id="pVideo" class="input-field" placeholder="YouTube/Vimeo URL"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Full Match Video URL</label><input id="pMatch" class="input-field" placeholder="YouTube/Vimeo URL"/></div>
+    </div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Player Bio</label><textarea id="pBio" class="input-field" rows="3" placeholder="Brief player biography..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-primary" onclick="closeModal('addPlayerModal')">Cancel</button>
+      <button class="btn-accent" onclick="savePlayer()"><i class="fas fa-save mr-2"></i>Save Player</button>
+    </div>
+  </div>
+</div>
+
+<!-- Evaluation Modal -->
+<div class="modal" id="evalModal">
+  <div class="modal-box" style="max-width:800px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="font-bold text-lg" style="color:var(--accent)"><i class="fas fa-clipboard-check mr-2"></i>New Scouting Evaluation</h3>
+      <button onclick="closeModal('evalModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;">&times;</button>
+    </div>
+    <div class="mb-4 grid grid-cols-2 gap-3">
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Player</label><select id="evalPlayer" class="input-field"></select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Date</label><input id="evalDate" type="date" class="input-field"/></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="evalTabs">
+      <button class="tab-btn active" onclick="showEvalTab('tech')">Technical</button>
+      <button class="tab-btn" onclick="showEvalTab('tact')">Tactical</button>
+      <button class="tab-btn" onclick="showEvalTab('phys')">Physical</button>
+      <button class="tab-btn" onclick="showEvalTab('psych')">Psychological</button>
+    </div>
+    <div id="evalTabContent"></div>
+    <div class="mt-4 card" style="background:#0f172a;">
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div><div class="text-xs mb-1" style="color:var(--muted)">Overall Score</div><div id="evalOverall" class="text-2xl font-bold" style="color:var(--accent)">—</div></div>
+        <div><div class="text-xs mb-1" style="color:var(--muted)">Player Tier</div><div id="evalTier" class="text-lg font-bold">—</div></div>
+        <div><div class="text-xs mb-1" style="color:var(--muted)">Rec. League</div><div id="evalLeague" class="text-sm font-semibold" style="color:#60a5fa">—</div></div>
+      </div>
+    </div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Recommended Clubs (comma separated)</label><input id="evalRecClubs" class="input-field" placeholder="Club A, Club B..."/></div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Strengths</label><textarea id="evalStrengths" class="input-field" rows="2" placeholder="Key strengths..."></textarea></div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Weaknesses</label><textarea id="evalWeaknesses" class="input-field" rows="2" placeholder="Areas to improve..."></textarea></div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Risk Assessment</label><textarea id="evalRisk" class="input-field" rows="2" placeholder="Risk factors..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-primary" onclick="closeModal('evalModal')">Cancel</button>
+      <button class="btn-accent" onclick="saveEval()"><i class="fas fa-save mr-2"></i>Save Evaluation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal" id="reportModal">
+  <div class="modal-box" style="max-width:900px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="font-bold text-lg" style="color:var(--accent)"><i class="fas fa-file-pdf mr-2"></i>Scouting Report</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" onclick="window.print()"><i class="fas fa-print mr-2"></i>Print/PDF</button>
+        <button onclick="closeModal('reportModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;">&times;</button>
+      </div>
+    </div>
+    <div id="reportContent"></div>
+  </div>
+</div>
+
+<!-- Add Club Modal -->
+<div class="modal" id="addClubModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 class="font-bold text-lg" style="color:var(--accent)">Add Club</h3>
+      <button onclick="closeModal('addClubModal')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;">&times;</button>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Club Name *</label><input id="cName" class="input-field" placeholder="Club name"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Country</label><input id="cCountry" class="input-field" placeholder="Country"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">League Level</label><input id="cLeague" class="input-field" placeholder="e.g. Division 2"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Playing Style</label>
+        <select id="cStyle" class="input-field"><option>High Press</option><option>Possession</option><option>Counter-Attack</option><option>Direct Play</option><option>Hybrid</option></select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Age Profile</label><input id="cAge" class="input-field" placeholder="e.g. U23 / Senior"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Foreign Player Openness</label>
+        <select id="cForeign" class="input-field"><option>High</option><option>Medium</option><option>Low</option></select></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Contact Email</label><input id="cEmail" class="input-field" placeholder="scout@club.com"/></div>
+      <div><label class="text-xs mb-1 block" style="color:var(--muted)">Ideal Archetypes</label><input id="cArchetypes" class="input-field" placeholder="e.g. Winger, Striker"/></div>
+    </div>
+    <div class="mt-3"><label class="text-xs mb-1 block" style="color:var(--muted)">Notes</label><textarea id="cNotes" class="input-field" rows="2" placeholder="Additional notes..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-primary" onclick="closeModal('addClubModal')">Cancel</button>
+      <button class="btn-accent" onclick="saveClub()"><i class="fas fa-save mr-2"></i>Save Club</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

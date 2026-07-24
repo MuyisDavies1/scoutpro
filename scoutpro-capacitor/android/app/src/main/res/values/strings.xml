@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScoutPro</string>
+    <string name="title_activity_main">ScoutPro</string>
+    <string name="package_name">com.scoutpro.app</string>
+    <string name="custom_url_scheme">scoutpro</string>
+</resources>

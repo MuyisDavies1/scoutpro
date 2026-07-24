@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ScoutPro — App Store Submission Checklist</title>
+  <meta name="description" content="Complete iOS App Store and Google Play Store submission checklist for ScoutPro football scouting app built with Capacitor.js"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --sp-dark:    #0f172a;
+      --sp-surface: #1e293b;
+      --sp-card:    #0f2744;
+      --sp-green:   #10b981;
+      --sp-cyan:    #06b6d4;
+      --sp-amber:   #f59e0b;
+      --sp-red:     #ef4444;
+      --sp-text:    #f1f5f9;
+      --sp-muted:   #94a3b8;
+      --sp-border:  #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--sp-dark);
+      color: var(--sp-text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── Progress bar ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0;
+      height: 3px; background: linear-gradient(90deg, #10b981, #06b6d4);
+      z-index: 9999; transition: width 0.2s;
+      width: 0%;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,23,42,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--sp-border);
+    }
+
+    /* ── Hero gradient ── */
+    .hero-bg {
+      background: linear-gradient(135deg, #0a1628 0%, #0f2744 50%, #0a1628 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(16,185,129,0.12) 0%, transparent 70%);
+    }
+
+    /* ── Checklist items ── */
+    .check-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: var(--sp-surface);
+      border: 1px solid var(--sp-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .check-item:hover { border-color: var(--sp-green); transform: translateX(3px); }
+    .check-item.done  {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.35);
+    }
+    .check-item.done .check-label { text-decoration: line-through; color: var(--sp-muted); }
+
+    .checkbox {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--sp-muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; margin-top: 1px;
+    }
+    .check-item.done .checkbox {
+      background: var(--sp-green);
+      border-color: var(--sp-green);
+    }
+    .checkbox i { font-size: 11px; color: #fff; display: none; }
+    .check-item.done .checkbox i { display: block; }
+
+    /* ── Phase pill ── */
+    .phase-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    }
+
+    /* ── Section header ── */
+    .section-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 24px 0 12px;
+      border-bottom: 1px solid var(--sp-border);
+      margin-bottom: 16px;
+    }
+    .section-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+
+    /* ── Progress ring ── */
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring-circle { transition: stroke-dashoffset 0.5s ease; }
+
+    /* ── Tab buttons ── */
+    .tab-btn {
+      padding: 10px 20px; border-radius: 8px;
+      font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: all 0.2s;
+      border: 1px solid var(--sp-border);
+      color: var(--sp-muted); background: transparent;
+    }
+    .tab-btn.active {
+      background: var(--sp-green);
+      border-color: var(--sp-green);
+      color: #fff;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: #020617;
+      border: 1px solid var(--sp-border);
+      border-radius: 10px;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+    .code-block pre { padding: 16px; white-space: pre; color: #e2e8f0; }
+    .code-block .comment { color: #64748b; }
+    .code-block .cmd     { color: #10b981; }
+    .code-block .flag    { color: #06b6d4; }
+    .code-block .string  { color: #f59e0b; }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: var(--sp-surface);
+      border: 1px solid var(--sp-border);
+      border-radius: 12px; padding: 20px;
+      text-align: center;
+    }
+
+    /* ── Timeline ── */
+    .timeline-item {
+      position: relative; padding-left: 32px; padding-bottom: 28px;
+    }
+    .timeline-item::before {
+      content: ''; position: absolute; left: 9px; top: 24px;
+      bottom: 0; width: 2px; background: var(--sp-border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot {
+      position: absolute; left: 0; top: 4px;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar        { width: 6px; }
+    ::-webkit-scrollbar-track  { background: var(--sp-dark); }
+    ::-webkit-scrollbar-thumb  { background: var(--sp-border); border-radius: 3px; }
+
+    /* ── Print ── */
+    @media print {
+      nav, #progress-bar, .no-print { display: none !important; }
+      body { background: #fff; color: #000; }
+      .check-item { break-inside: avoid; }
+    }
+
+    /* ── Tooltip ── */
+    [data-tip] { position: relative; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #f1f5f9; padding: 4px 10px;
+      border-radius: 6px; font-size: 12px; white-space: nowrap;
+      pointer-events: none; z-index: 200;
+    }
+
+    @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .pulse-green { animation: pulse-green 2s infinite; }
+  </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress-bar"></div>
+
+<!-- ═══════════════════════════════════════════════════ NAVBAR ═══ -->
+<nav class="px-6 py-3 flex items-center justify-between gap-4">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl" style="background:linear-gradient(135deg,#0f4c81,#10b981)">⚽</div>
+    <div>
+      <div class="font-bold text-sm leading-tight">ScoutPro</div>
+      <div class="text-xs" style="color:var(--sp-muted)">Capacitor.js — App Store Checklist</div>
+    </div>
+  </div>
+  <div class="hidden md:flex items-center gap-6 text-sm" style="color:var(--sp-muted)">
+    <a href="#overview"  class="hover:text-white transition-colors">Overview</a>
+    <a href="#scaffold"  class="hover:text-white transition-colors">Scaffold</a>
+    <a href="#ios"       class="hover:text-white transition-colors">iOS</a>
+    <a href="#android"   class="hover:text-white transition-colors">Android</a>
+    <a href="#checklist" class="hover:text-white transition-colors">Checklist</a>
+    <a href="#timeline"  class="hover:text-white transition-colors">Timeline</a>
+  </div>
+  <div class="flex items-center gap-3">
+    <button onclick="resetAll()" class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:border-red-500 hover:text-red-400" style="border-color:var(--sp-border);color:var(--sp-muted)">
+      <i class="fas fa-rotate-left mr-1"></i>Reset
+    </button>
+    <button onclick="window.print()" class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:border-green-500 hover:text-green-400" style="border-color:var(--sp-border);color:var(--sp-muted)">
+      <i class="fas fa-print mr-1"></i>Print
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════ HERO ═══ -->
+<section class="hero-bg px-6 py-16 text-center" style="position:relative;">
+  <div class="relative z-10 max-w-3xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10b981;">
+      <span class="w-2 h-2 rounded-full bg-green-400 pulse-green"></span>
+      Capacitor.js v6 · iOS 14+ · Android 8.0+
+    </div>
+    <h1 class="text-4xl md:text-5xl font-black mb-4 leading-tight">
+      App Store <span style="color:#10b981;">Submission</span> Checklist
+    </h1>
+    <p class="text-lg mb-8" style="color:var(--sp-muted)">
+      Everything you need to ship ScoutPro to the Apple App Store and Google Play Store —
+      from project scaffold to live listing.
+    </p>
+
+    <!-- Global progress bar -->
+    <div class="max-w-md mx-auto">
+      <div class="flex justify-between text-sm mb-2" style="color:var(--sp-muted)">
+        <span>Overall Progress</span>
+        <span id="global-count">0 / <span id="total-count">0</span> completed</span>
+      </div>
+      <div class="w-full rounded-full h-3" style="background:var(--sp-border)">
+        <div id="global-bar" class="h-3 rounded-full transition-all duration-500" style="background:linear-gradient(90deg,#10b981,#06b6d4);width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Quick stat cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 text-left">
+      <div class="stat-card">
+        <div class="text-2xl font-black" style="color:#10b981;">6</div>
+        <div class="text-xs mt-1" style="color:var(--sp-muted)">Scaffold Files</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-2xl font-black" style="color:#06b6d4;">13</div>
+        <div class="text-xs mt-1" style="color:var(--sp-muted)">iOS Icon Sizes</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-2xl font-black" style="color:#f59e0b;">5</div>
+        <div class="text-xs mt-1" style="color:var(--sp-muted)">Android Densities</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-2xl font-black" style="color:#a78bfa;">~14</div>
+        <div class="text-xs mt-1" style="color:var(--sp-muted)">Days to Ship</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ MAIN ═══ -->
+<main class="max-w-5xl mx-auto px-4 pb-24" id="overview">
+
+<!-- ── SCAFFOLD OVERVIEW ─────────────────────────────────────────────────── -->
+<section id="scaffold" class="pt-16">
+  <div class="section-head">
+    <div class="section-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">
+      <i class="fas fa-folder-tree"></i>
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">Project Scaffold Overview</h2>
+      <p class="text-sm" style="color:var(--sp-muted)">Generated files ready inside <code>scoutpro-capacitor/</code></p>
+    </div>
+  </div>
+
+  <div class="code-block mb-6">
+    <pre><span class="comment"># scoutpro-capacitor/ — complete project tree</span>
+scoutpro-capacitor/
+├── <span class="string">capacitor.config.ts</span>          <span class="comment"># Capacitor configuration (appId, plugins, server)</span>
+├── <span class="string">package.json</span>                  <span class="comment"># npm dependencies + build scripts</span>
+├── <span class="string">.gitignore</span>                    <span class="comment"># ignores node_modules, ios/, android/ build outputs</span>
+│
+├── <span class="string">www/</span>                          <span class="comment"># ← Your ScoutPro web app lives here</span>
+│   ├── index.html
+│   ├── app.js
+│   ├── data.js
+│   ├── manifest.json
+│   ├── sw.js
+│   └── icons/ (8 PNG sizes)
+│
+├── <span class="string">scripts/</span>
+│   ├── setup.sh                  <span class="comment"># First-time platform initialisation</span>
+│   └── build.sh                  <span class="comment"># One-command release builder</span>
+│
+├── <span class="string">ios/App/App/</span>
+│   ├── AppDelegate.swift          <span class="comment"># Push tokens, deep links, APNs</span>
+│   ├── Info.plist                 <span class="comment"># Privacy strings, URL schemes, background modes</span>
+│   └── Assets.xcassets/
+│       └── AppIcon.appiconset/
+│           ├── Contents.json      <span class="comment"># Xcode icon manifest (13 sizes)</span>
+│           └── icon-*.png         <span class="comment"># 20px → 1024px icons</span>
+│
+└── <span class="string">android/app/src/main/</span>
+    ├── AndroidManifest.xml        <span class="comment"># Permissions, deep links, FileProvider</span>
+    ├── java/com/scoutpro/app/
+    │   └── MainActivity.java      <span class="comment"># Extends BridgeActivity</span>
+    └── res/
+        ├── mipmap-{m,h,xh,xxh,xxxh}dpi/
+        │   ├── ic_launcher.png         <span class="comment"># 48 → 192px</span>
+        │   └── ic_launcher_foreground.png
+        ├── playstore/icon-512.png <span class="comment"># Play Store listing icon</span>
+        └── values/
+            ├── strings.xml, colors.xml, styles.xml</pre>
+  </div>
+
+  <!-- File details table -->
+  <div class="overflow-x-auto rounded-xl border" style="border-color:var(--sp-border)">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="background:var(--sp-surface);border-bottom:1px solid var(--sp-border)">
+          <th class="text-left px-4 py-3 font-semibold" style="color:var(--sp-muted)">File</th>
+          <th class="text-left px-4 py-3 font-semibold" style="color:var(--sp-muted)">Purpose</th>
+          <th class="text-left px-4 py-3 font-semibold" style="color:var(--sp-muted)">Platform</th>
+          <th class="text-left px-4 py-3 font-semibold" style="color:var(--sp-muted)">Edit Required?</th>
+        </tr>
+      </thead>
+      <tbody id="file-table">
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── PLATFORM TABS ─────────────────────────────────────────────────────── -->
+<section id="ios" class="pt-16">
+  <div class="section-head">
+    <div class="section-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">
+      <i class="fab fa-apple"></i>
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">Platform Setup Commands</h2>
+      <p class="text-sm" style="color:var(--sp-muted)">Run these from inside <code>scoutpro-capacitor/</code></p>
+    </div>
+  </div>
+
+  <div class="flex gap-3 mb-6 flex-wrap">
+    <button class="tab-btn active" onclick="switchTab('setup','quick')">Quick Start</button>
+    <button class="tab-btn" onclick="switchTab('setup','ios')"><i class="fab fa-apple mr-1"></i>iOS</button>
+    <button class="tab-btn" onclick="switchTab('setup','android')"><i class="fab fa-android mr-1"></i>Android</button>
+    <button class="tab-btn" onclick="switchTab('setup','signing')"><i class="fas fa-key mr-1"></i>Signing</button>
+  </div>
+
+  <div id="setup-quick" class="tab-pane active">
+    <div class="code-block">
+      <pre><span class="comment"># 1. One-time setup (installs deps + adds platforms)</span>
+<span class="cmd">cd</span> scoutpro-capacitor
+<span class="cmd">bash</span> scripts/setup.sh
+
+<span class="comment"># 2. After any code change, sync web assets to native layers</span>
+<span class="cmd">npx cap sync</span>
+
+<span class="comment"># 3a. Open in Xcode (macOS only)</span>
+<span class="cmd">npx cap open ios</span>
+
+<span class="comment"># 3b. Open in Android Studio (any OS)</span>
+<span class="cmd">npx cap open android</span>
+
+<span class="comment"># 4. Run on a connected device / emulator</span>
+<span class="cmd">npx cap run ios</span>        <span class="flag">--target "iPhone 15 Pro"</span>
+<span class="cmd">npx cap run android</span>   <span class="flag">--target emulator-5554</span></pre>
+    </div>
+  </div>
+
+  <div id="setup-ios" class="tab-pane">
+    <div class="code-block">
+      <pre><span class="comment"># macOS + Xcode 15+ required</span>
+<span class="cmd">xcode-select</span> <span class="flag">--install</span>          <span class="comment"># install CLI tools if missing</span>
+<span class="cmd">sudo gem install</span> cocoapods         <span class="comment"># or: brew install cocoapods</span>
+
+<span class="comment"># Add iOS platform (first time only)</span>
+<span class="cmd">npx cap add ios</span>
+
+<span class="comment"># Sync + open Xcode</span>
+<span class="cmd">npx cap sync</span>
+<span class="cmd">npx cap open ios</span>
+
+<span class="comment"># In Xcode:</span>
+<span class="comment">#  1. Signing & Capabilities → select your Apple Developer Team</span>
+<span class="comment">#  2. Bundle Identifier → com.scoutpro.app</span>
+<span class="comment">#  3. Deployment Target → iOS 14.0</span>
+<span class="comment">#  4. Product → Archive → Distribute App → App Store Connect</span>
+
+<span class="comment"># Build for release (after Xcode setup)</span>
+<span class="cmd">npx cap build ios</span> <span class="flag">--configuration release</span></pre>
+    </div>
+  </div>
+
+  <div id="setup-android" class="tab-pane">
+    <div class="code-block">
+      <pre><span class="comment"># Android Studio + JDK 17 required (all platforms)</span>
+<span class="comment"># Download: https://developer.android.com/studio</span>
+
+<span class="comment"># Add Android platform (first time only)</span>
+<span class="cmd">npx cap add android</span>
+
+<span class="comment"># Sync + open Android Studio</span>
+<span class="cmd">npx cap sync</span>
+<span class="cmd">npx cap open android</span>
+
+<span class="comment"># In Android Studio:</span>
+<span class="comment">#  1. Build → Generate Signed Bundle/APK</span>
+<span class="comment">#  2. Choose: Android App Bundle (.aab) — required for Play Store</span>
+<span class="comment">#  3. Create or select your .jks keystore</span>
+<span class="comment">#  4. Build Variant: Release</span>
+
+<span class="comment"># Or build from command line</span>
+<span class="cmd">cd</span> android
+<span class="cmd">./gradlew bundleRelease</span>
+<span class="comment"># Output: app/build/outputs/bundle/release/app-release.aab</span></pre>
+    </div>
+  </div>
+
+  <div id="setup-signing" class="tab-pane">
+    <div class="code-block">
+      <pre><span class="comment">══ iOS Signing ══════════════════════════════════════════════</span>
+<span class="comment"># 1. Enroll in Apple Developer Program ($99/year)</span>
+<span class="comment">#    https://developer.apple.com/programs/</span>
+
+<span class="comment"># 2. Create App ID in Developer portal:</span>
+<span class="comment">#    Identifiers → + → App IDs → com.scoutpro.app</span>
+<span class="comment">#    Enable: Push Notifications, Sign in with Apple (optional)</span>
+
+<span class="comment"># 3. Create distribution certificate in Xcode:</span>
+<span class="comment">#    Preferences → Accounts → Manage Certificates → +</span>
+<span class="comment">#    → Apple Distribution</span>
+
+<span class="comment"># 4. Create App Store provisioning profile:</span>
+<span class="comment">#    Developer portal → Profiles → Distribution → App Store</span>
+
+<span class="comment">══ Android Signing ══════════════════════════════════════════</span>
+<span class="comment"># Generate release keystore (one time, keep this safe!)</span>
+<span class="cmd">keytool</span> <span class="flag">-genkey -v</span> \
+  <span class="flag">-keystore</span> <span class="string">scoutpro-release.jks</span> \
+  <span class="flag">-alias</span> <span class="string">scoutpro</span> \
+  <span class="flag">-keyalg</span> RSA <span class="flag">-keysize</span> 2048 \
+  <span class="flag">-validity</span> 10000
+
+<span class="comment"># Set credentials in gradle.properties (NOT in build.gradle)</span>
+<span class="string">KEYSTORE_PATH=../scoutpro-release.jks</span>
+<span class="string">KEYSTORE_PASSWORD=your_secure_password</span>
+<span class="string">KEY_ALIAS=scoutpro</span>
+<span class="string">KEY_PASSWORD=your_key_password</span>
+
+<span class="comment"># NEVER commit .jks or gradle.properties to git!</span>
+<span class="comment"># Add to .gitignore: *.jks, gradle.properties</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ── CHECKLIST ─────────────────────────────────────────────────────────── -->
+<section id="checklist" class="pt-16">
+  <div class="section-head">
+    <div class="section-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+      <i class="fas fa-clipboard-check"></i>
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">Full Submission Checklist</h2>
+      <p class="text-sm" style="color:var(--sp-muted)">Click each item to mark complete. Progress is saved in your browser.</p>
+    </div>
+  </div>
+
+  <!-- Platform tabs -->
+  <div class="flex gap-3 mb-8 flex-wrap">
+    <button class="tab-btn active" onclick="switchChecklistTab('both')">All Tasks</button>
+    <button class="tab-btn" onclick="switchChecklistTab('ios')"><i class="fab fa-apple mr-1"></i>iOS Only</button>
+    <button class="tab-btn" onclick="switchChecklistTab('android')"><i class="fab fa-android mr-1"></i>Android Only</button>
+  </div>
+
+  <div id="checklist-container">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+<!-- ── TIMELINE ──────────────────────────────────────────────────────────── -->
+<section id="timeline" class="pt-16">
+  <div class="section-head">
+    <div class="section-icon" style="background:rgba(167,139,250,0.15);color:#a78bfa;">
+      <i class="fas fa-timeline"></i>
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">Recommended Launch Timeline</h2>
+      <p class="text-sm" style="color:var(--sp-muted)">Realistic schedule for a first-time App Store submission</p>
+    </div>
+  </div>
+
+  <div class="pl-4" id="timeline-container">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+<!-- ── STORE ASSETS REFERENCE ───────────────────────────────────────────── -->
+<section class="pt-16">
+  <div class="section-head">
+    <div class="section-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">
+      <i class="fas fa-images"></i>
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">Store Asset Specifications</h2>
+      <p class="text-sm" style="color:var(--sp-muted)">Required media for App Store Connect and Google Play Console</p>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- iOS -->
+    <div class="rounded-xl border overflow-hidden" style="border-color:var(--sp-border)">
+      <div class="px-4 py-3 font-bold flex items-center gap-2" style="background:var(--sp-surface)">
+        <i class="fab fa-apple"></i> App Store Connect
+      </div>
+      <div class="divide-y" style="divide-color:var(--sp-border)">
+        <div id="ios-assets"></div>
+      </div>
+    </div>
+    <!-- Android -->
+    <div class="rounded-xl border overflow-hidden" style="border-color:var(--sp-border)">
+      <div class="px-4 py-3 font-bold flex items-center gap-2" style="background:var(--sp-surface)">
+        <i class="fab fa-android"></i> Google Play Console
+      </div>
+      <div class="divide-y" style="divide-color:var(--sp-border)">
+        <div id="android-assets"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="border-t mt-16 px-6 py-8 text-center text-sm" style="border-color:var(--sp-border);color:var(--sp-muted)">
+  <div class="flex justify-center items-center gap-2 mb-2">
+    <span class="text-lg">⚽</span>
+    <span class="font-bold text-white">ScoutPro</span>
+    <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(16,185,129,0.15);color:#10b981;">Capacitor v6</span>
+  </div>
+  <p>FIFA-Licensed Football Scouting Platform · Built with Capacitor.js · iOS & Android</p>
+  <p class="mt-1">
+    <a href="https://capacitorjs.com/docs" class="hover:text-white transition-colors" target="_blank">Capacitor Docs</a>
+    <span class="mx-2">·</span>
+    <a href="https://developer.apple.com/app-store/review/guidelines/" class="hover:text-white transition-colors" target="_blank">Apple Guidelines</a>
+    <span class="mx-2">·</span>
+    <a href="https://play.google.com/console/about/guides/releasewithconfidence/" class="hover:text-white transition-colors" target="_blank">Play Console Guide</a>
+  </p>
+</footer>
+
+<script>
+/* ═══════════════════════════════ DATA ════════════════════════════════════ */
+
+const FILES = [
+  { file: 'capacitor.config.ts',            purpose: 'App ID, plugin config, server settings',              platform: 'Both',    edit: 'No — pre-configured' },
+  { file: 'package.json',                    purpose: 'Capacitor 6 + plugin dependencies',                  platform: 'Both',    edit: 'No — ready to npm install' },
+  { file: 'ios/App/App/Info.plist',          purpose: 'Privacy strings, URL schemes, background modes',     platform: 'iOS',     edit: 'Add APNs key after enrolment' },
+  { file: 'ios/App/App/AppDelegate.swift',   purpose: 'APNs token registration, deep link handling',        platform: 'iOS',     edit: 'No — ready to use' },
+  { file: 'ios/…/AppIcon.appiconset/',       purpose: '13 PNG icon sizes + Contents.json for Xcode',        platform: 'iOS',     edit: 'No — auto-generated' },
+  { file: 'android/app/src/main/AndroidManifest.xml', purpose: 'Permissions, deep links, FileProvider',    platform: 'Android', edit: 'No — ready to use' },
+  { file: 'android/app/build.gradle',        purpose: 'Signing config, SDK versions, AAB bundle',           platform: 'Android', edit: 'Set keystore passwords' },
+  { file: 'android/app/src/main/java/…/MainActivity.java', purpose: 'Extends BridgeActivity',              platform: 'Android', edit: 'No — ready to use' },
+  { file: 'android/…/res/values/strings.xml', purpose: 'App name, URL scheme string resources',            platform: 'Android', edit: 'No — pre-filled' },
+  { file: 'android/…/res/mipmap-*/ic_launcher.png', purpose: '5 mipmap densities (48–192px)',              platform: 'Android', edit: 'No — auto-generated' },
+  { file: 'android/…/playstore/icon-512.png', purpose: 'Play Store high-res icon',                         platform: 'Android', edit: 'No — auto-generated' },
+  { file: 'scripts/setup.sh',               purpose: 'First-time platform init script',                    platform: 'Both',    edit: 'No — run as-is' },
+  { file: 'scripts/build.sh',               purpose: 'One-command release builder',                        platform: 'Both',    edit: 'No — run as-is' },
+];
+
+const CHECKLIST = [
+  // ── Pre-build ──
+  { id:'c1',  phase:'pre',     platform:'both',    title:'Install Node.js 18+ and npm 9+',
+    note:'https://nodejs.org — verify with node -v && npm -v' },
+  { id:'c2',  phase:'pre',     platform:'both',    title:'Run npm install inside scoutpro-capacitor/',
+    note:'Installs Capacitor 6, all plugins, and TypeScript' },
+  { id:'c3',  phase:'pre',     platform:'both',    title:'Run bash scripts/setup.sh to add iOS & Android platforms',
+    note:'Creates ios/ and android/ native folders via npx cap add' },
+  { id:'c4',  phase:'pre',     platform:'both',    title:'Run npx cap sync to copy www/ into native layers',
+    note:'Repeat after every web code change' },
+  { id:'c5',  phase:'pre',     platform:'both',    title:'Run npx cap doctor and resolve all warnings',
+    note:'Checks for missing dependencies (Xcode, JDK, Gradle, CocoaPods)' },
+
+  // ── iOS ──
+  { id:'i1',  phase:'ios',     platform:'ios',     title:'Enrol in Apple Developer Program ($99/year)',
+    note:'developer.apple.com/programs — required for device testing and App Store' },
+  { id:'i2',  phase:'ios',     platform:'ios',     title:'Install Xcode 15+ and accept license agreement',
+    note:'Mac App Store or https://developer.apple.com/xcode' },
+  { id:'i3',  phase:'ios',     platform:'ios',     title:'Install CocoaPods (sudo gem install cocoapods)',
+    note:'Required for Capacitor iOS dependency management' },
+  { id:'i4',  phase:'ios',     platform:'ios',     title:'Register App ID com.scoutpro.app in Developer portal',
+    note:'developer.apple.com → Identifiers → + → App IDs' },
+  { id:'i5',  phase:'ios',     platform:'ios',     title:'Enable capabilities: Push Notifications, Background Modes',
+    note:'In Xcode: Signing & Capabilities tab → + Capability' },
+  { id:'i6',  phase:'ios',     platform:'ios',     title:'Verify all AppIcon sizes are present (Contents.json)',
+    note:'ios/App/App/Assets.xcassets/AppIcon.appiconset/ — 13 PNGs provided' },
+  { id:'i7',  phase:'ios',     platform:'ios',     title:'Create LaunchScreen.storyboard with ScoutPro branding',
+    note:'Dark background #0f172a + football icon. Xcode → File → New → Launch Screen' },
+  { id:'i8',  phase:'ios',     platform:'ios',     title:'Set Deployment Target to iOS 14.0 in Xcode Build Settings',
+    note:'Target → General → Minimum Deployments → iOS 14.0' },
+  { id:'i9',  phase:'ios',     platform:'ios',     title:'Test on physical iPhone/iPad via Xcode (not just simulator)',
+    note:'App Store review often catches issues the simulator misses' },
+  { id:'i10', phase:'ios',     platform:'ios',     title:'Create App record in App Store Connect',
+    note:'appstoreconnect.apple.com → My Apps → + → New App' },
+  { id:'i11', phase:'ios',     platform:'ios',     title:'Fill App Store metadata: name, subtitle, keywords, description',
+    note:'Name ≤30 chars, subtitle ≤30 chars, keywords ≤100 chars' },
+  { id:'i12', phase:'ios',     platform:'ios',     title:'Upload 6.5" iPhone screenshots (1284×2778 or 1290×2796)',
+    note:'Required: at least 1 screenshot. Recommended: 5–10' },
+  { id:'i13', phase:'ios',     platform:'ios',     title:'Upload 12.9" iPad Pro screenshots (2048×2732)',
+    note:'Required if app supports iPad' },
+  { id:'i14', phase:'ios',     platform:'ios',     title:'Set Privacy Policy URL (required for all apps)',
+    note:'Host a privacy.html on your website. Minimum: data use disclosure' },
+  { id:'i15', phase:'ios',     platform:'ios',     title:'Complete App Privacy nutrition label in App Store Connect',
+    note:'Declare: data linked to user, data used to track, etc.' },
+  { id:'i16', phase:'ios',     platform:'ios',     title:'Archive and upload build via Xcode → Product → Archive',
+    note:'Use App Distribution → App Store Connect → Upload' },
+  { id:'i17', phase:'ios',     platform:'ios',     title:'Submit for TestFlight beta (optional but recommended)',
+    note:'External testing requires Apple review (~1 day)' },
+  { id:'i18', phase:'ios',     platform:'ios',     title:'Submit for App Store review',
+    note:'Average review time: 1–3 business days. First review: up to 7 days.' },
+
+  // ── Android ──
+  { id:'a1',  phase:'android', platform:'android', title:'Create Google Play Developer account ($25 one-time fee)',
+    note:'play.google.com/console — verify identity (up to 48 hours)' },
+  { id:'a2',  phase:'android', platform:'android', title:'Install Android Studio (Electric Eel or newer) + JDK 17',
+    note:'developer.android.com/studio — set JAVA_HOME environment variable' },
+  { id:'a3',  phase:'android', platform:'android', title:'Generate release keystore with keytool command',
+    note:'scoutpro-release.jks — store securely, NEVER commit to git' },
+  { id:'a4',  phase:'android', platform:'android', title:'Set keystore credentials in android/gradle.properties',
+    note:'KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD' },
+  { id:'a5',  phase:'android', platform:'android', title:'Verify minSdk=26 and targetSdk=34 in build.gradle',
+    note:'targetSdk 34 required for Play Store from August 2024' },
+  { id:'a6',  phase:'android', platform:'android', title:'Verify all mipmap icon sizes (mdpi → xxxhdpi)',
+    note:'android/app/src/main/res/mipmap-*/ic_launcher.png — 5 densities provided' },
+  { id:'a7',  phase:'android', platform:'android', title:'Create adaptive icon background XML (optional but recommended)',
+    note:'res/drawable/ic_launcher_background.xml — solid #0f172a or gradient' },
+  { id:'a8',  phase:'android', platform:'android', title:'Build signed AAB: ./gradlew bundleRelease',
+    note:'Output: app/build/outputs/bundle/release/app-release.aab' },
+  { id:'a9',  phase:'android', platform:'android', title:'Test AAB on a real Android device',
+    note:'Use bundletool: bundletool build-apks --bundle=app-release.aab --output=test.apks' },
+  { id:'a10', phase:'android', platform:'android', title:'Create app in Google Play Console (internal testing)',
+    note:'Play Console → Create app → App details → Language, category' },
+  { id:'a11', phase:'android', platform:'android', title:'Complete Store listing: title, short/long descriptions',
+    note:'Title ≤50 chars, Short ≤80 chars, Full ≤4000 chars' },
+  { id:'a12', phase:'android', platform:'android', title:'Upload 512×512 PNG icon (provided in playstore/ folder)',
+    note:'Play Console → Main store listing → App icon' },
+  { id:'a13', phase:'android', platform:'android', title:'Upload feature graphic (1024×500 PNG/JPG)',
+    note:'Banner shown at top of listing. Dark sports-tech aesthetic recommended.' },
+  { id:'a14', phase:'android', platform:'android', title:'Upload phone screenshots (min 2, max 8 per device type)',
+    note:'Portrait: 1080×1920 recommended. At least 16:9 aspect ratio.' },
+  { id:'a15', phase:'android', platform:'android', title:'Set content rating via questionnaire in Play Console',
+    note:'Policy → App content → Content rating → Start questionnaire' },
+  { id:'a16', phase:'android', platform:'android', title:'Complete Data safety section (equivalent to Apple Privacy Label)',
+    note:'Declare what data the app collects and how it is used' },
+  { id:'a17', phase:'android', platform:'android', title:'Opt into Google Play App Signing',
+    note:'Recommended — Google manages the signing key; you upload upload key only' },
+  { id:'a18', phase:'android', platform:'android', title:'Upload AAB to internal testing track → roll out to review',
+    note:'Internal → Alpha → Beta → Production (can go direct to Production)' },
+  { id:'a19', phase:'android', platform:'android', title:'Submit for Production review',
+    note:'New apps: 3–7 days. Updates to existing apps: hours–2 days.' },
+];
+
+const TIMELINE = [
+  { day: 'Day 1',  color: '#10b981', title: 'Setup & Scaffold',
+    tasks: ['Run scripts/setup.sh', 'npm install', 'npx cap sync', 'Resolve npx cap doctor warnings'] },
+  { day: 'Day 2–3', color: '#06b6d4', title: 'iOS Config & Testing',
+    tasks: ['Enrol in Apple Developer ($99)', 'Register App ID in Developer portal', 'Open in Xcode, set signing', 'Test on iPhone simulator & real device'] },
+  { day: 'Day 3–4', color: '#06b6d4', title: 'Android Config & Build',
+    tasks: ['Install Android Studio + JDK 17', 'Generate release keystore', 'Run ./gradlew bundleRelease', 'Test AAB on real Android device'] },
+  { day: 'Day 4–5', color: '#f59e0b', title: 'Store Assets Creation',
+    tasks: ['Design App Store screenshots (6.5" + 12.9")', 'Write store listing copy', 'Create 1024×500 feature graphic (Android)', 'Write privacy policy page'] },
+  { day: 'Day 5–6', color: '#f59e0b', title: 'Store Listing Setup',
+    tasks: ['Create app record in App Store Connect', 'Create app in Google Play Console', 'Upload all assets & screenshots', 'Complete privacy labels / data safety'] },
+  { day: 'Day 7',   color: '#a78bfa', title: 'TestFlight / Internal Testing',
+    tasks: ['Upload iOS build to TestFlight', 'Upload Android AAB to Internal Testing', 'Run through the full app on real devices', 'Fix any review-blocking bugs'] },
+  { day: 'Day 8–9', color: '#a78bfa', title: 'Final Review Submission',
+    tasks: ['Submit iOS to App Store review', 'Submit Android to Production review', 'Monitor review status daily in both consoles'] },
+  { day: 'Day 11–14', color: '#10b981', title: '🚀 Apps Live!',
+    tasks: ['iOS approved (avg 1–3 days)', 'Android approved (avg 3–7 days)', 'Monitor crash reports and ratings', 'Plan v1.1 with user feedback'] },
+];
+
+const IOS_ASSETS = [
+  { asset: 'App icon', spec: '1024×1024 px PNG, no alpha', status: 'ready' },
+  { asset: 'iPhone 6.7" screenshots', spec: '1290×2796 px (up to 10)', status: 'needed' },
+  { asset: 'iPhone 6.5" screenshots', spec: '1284×2778 px (up to 10)', status: 'needed' },
+  { asset: 'iPad 12.9" screenshots', spec: '2048×2732 px (if iPad)', status: 'needed' },
+  { asset: 'App Preview video', spec: '15–30 sec MP4 (optional)', status: 'optional' },
+  { asset: 'Privacy Policy URL', spec: 'Publicly accessible HTTPS URL', status: 'needed' },
+  { asset: 'Support URL', spec: 'Your contact/support page', status: 'needed' },
+];
+
+const ANDROID_ASSETS = [
+  { asset: 'High-res icon', spec: '512×512 PNG', status: 'ready' },
+  { asset: 'Feature graphic', spec: '1024×500 PNG or JPG', status: 'needed' },
+  { asset: 'Phone screenshots', spec: '1080×1920 px (2–8 required)', status: 'needed' },
+  { asset: 'Tablet screenshots', spec: '1600×2560 px (optional)', status: 'optional' },
+  { asset: 'Promo video', spec: 'YouTube URL (optional)', status: 'optional' },
+  { asset: 'Privacy Policy URL', spec: 'Publicly accessible HTTPS URL', status: 'needed' },
+];
+
+/* ═══════════════════════════════ RENDER ══════════════════════════════════ */
+
+let checkState = JSON.parse(localStorage.getItem('sp_checklist') || '{}');
+
+function saveState() { localStorage.setItem('sp_checklist', JSON.stringify(checkState)); }
+
+function toggleItem(id) {
+  checkState[id] = !checkState[id];
+  saveState();
+  renderChecklist(currentFilter);
+  updateGlobalProgress();
+}
+
+function resetAll() {
+  if (!confirm('Reset all checklist progress?')) return;
+  checkState = {};
+  saveState();
+  renderChecklist(currentFilter);
+  updateGlobalProgress();
+}
+
+function updateGlobalProgress() {
+  const total = CHECKLIST.length;
+  const done  = CHECKLIST.filter(i => checkState[i.id]).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('global-bar').style.width   = pct + '%';
+  document.getElementById('global-count').textContent = done + ' / ';
+  document.getElementById('total-count').textContent  = total + ' completed';
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+let currentFilter = 'both';
+
+function switchChecklistTab(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('#checklist ~ * .tab-btn, .tab-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes(filter)) b.classList.add('active');
+    else if (b.getAttribute('onclick')?.includes('switchChecklistTab')) b.classList.remove('active');
+  });
+  renderChecklist(filter);
+}
+
+const phaseLabels = {
+  pre:     { label: 'PRE-BUILD',    color: 'bg-green-900 text-green-300' },
+  ios:     { label: 'iOS SETUP',    color: 'bg-cyan-900 text-cyan-300' },
+  android: { label: 'ANDROID SETUP',color: 'bg-green-900 text-green-300' },
+};
+
+function renderChecklist(filter) {
+  const phases = ['pre', 'ios', 'android'];
+  const phaseNames = { pre: 'Pre-Build — Both Platforms', ios: 'iOS — App Store', android: 'Android — Google Play' };
+  let html = '';
+
+  phases.forEach(phase => {
+    const items = CHECKLIST.filter(i => i.phase === phase && (filter === 'both' || i.platform === 'both' || i.platform === filter));
+    if (!items.length) return;
+
+    const done  = items.filter(i => checkState[i.id]).length;
+    const total = items.length;
+    const pct   = Math.round(done / total * 100);
+
+    const iconMap = { pre: 'fas fa-tools text-green-400', ios: 'fab fa-apple text-cyan-400', android: 'fab fa-android text-green-400' };
+    const bgMap   = { pre: 'rgba(16,185,129,0.1)', ios: 'rgba(6,182,212,0.1)', android: 'rgba(16,185,129,0.1)' };
+
+    html += `<div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${bgMap[phase]}">
+            <i class="${iconMap[phase]} text-sm"></i>
+          </div>
+          <h3 class="font-bold text-base">${phaseNames[phase]}</h3>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-semibold" style="color:var(--sp-muted)">${done}/${total}</span>
+          <div class="w-24 rounded-full h-2" style="background:var(--sp-border)">
+            <div class="h-2 rounded-full transition-all" style="background:${phase==='ios'?'#06b6d4':'#10b981'};width:${pct}%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        ${items.map(item => `
+          <div class="check-item ${checkState[item.id] ? 'done' : ''}" onclick="toggleItem('${item.id}')">
+            <div class="checkbox"><i class="fas fa-check"></i></div>
+            <div class="flex-1">
+              <div class="check-label font-medium text-sm">${item.title}</div>
+              <div class="text-xs mt-0.5" style="color:var(--sp-muted)">${item.note}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('checklist-container').innerHTML = html;
+}
+
+/* ── File table ── */
+function renderFileTable() {
+  const colors = { Both: '#10b981', iOS: '#06b6d4', Android: '#a3e635' };
+  const edits  = { 'No — pre-configured': '#10b981', 'No — ready to use': '#10b981', 'No — auto-generated': '#10b981', 'No — run as-is': '#10b981', 'No — pre-filled': '#10b981', 'Add APNs key after enrolment': '#f59e0b', 'Set keystore passwords': '#f59e0b' };
+  document.getElementById('file-table').innerHTML = FILES.map((f, i) => `
+    <tr style="border-bottom:1px solid var(--sp-border);${i % 2 ? 'background:rgba(255,255,255,0.02)' : ''}">
+      <td class="px-4 py-3"><code class="text-xs" style="color:#06b6d4">${f.file}</code></td>
+      <td class="px-4 py-3 text-sm" style="color:var(--sp-muted)">${f.purpose}</td>
+      <td class="px-4 py-3"><span class="phase-pill" style="background:rgba(${f.platform==='iOS'?'6,182,212':'f.platform==="Android"?163,230,53:16,185,129'},0.15);color:${colors[f.platform]}">${f.platform}</span></td>
+      <td class="px-4 py-3 text-xs font-semibold" style="color:${edits[f.edit]||'#f59e0b'}">${f.edit}</td>
+    </tr>`).join('');
+}
+
+/* ── Timeline ── */
+function renderTimeline() {
+  document.getElementById('timeline-container').innerHTML = TIMELINE.map(t => `
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:${t.color}22;border:2px solid ${t.color}">
+        <div class="w-2 h-2 rounded-full" style="background:${t.color}"></div>
+      </div>
+      <div class="mb-1">
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full mr-2" style="background:${t.color}22;color:${t.color}">${t.day}</span>
+        <span class="font-bold">${t.title}</span>
+      </div>
+      <ul class="mt-2 space-y-1">
+        ${t.tasks.map(task => `<li class="text-sm flex items-start gap-2" style="color:var(--sp-muted)"><span style="color:${t.color};margin-top:3px;">▸</span>${task}</li>`).join('')}
+      </ul>
+    </div>`).join('');
+}
+
+/* ── Store assets ── */
+function renderAssets() {
+  const statusColors = { ready: '#10b981', needed: '#f59e0b', optional: '#94a3b8' };
+  const statusLabels = { ready: 'Ready', needed: 'Needed', optional: 'Optional' };
+
+  ['ios','android'].forEach(platform => {
+    const data = platform === 'ios' ? IOS_ASSETS : ANDROID_ASSETS;
+    document.getElementById(`${platform}-assets`).innerHTML = data.map(a => `
+      <div class="flex items-center justify-between px-4 py-3 gap-4">
+        <div>
+          <div class="font-medium text-sm">${a.asset}</div>
+          <div class="text-xs" style="color:var(--sp-muted)">${a.spec}</div>
+        </div>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+          style="background:${statusColors[a.status]}22;color:${statusColors[a.status]}">
+          ${statusLabels[a.status]}
+        </span>
+      </div>`).join('');
+  });
+}
+
+/* ── Tab switcher (setup commands) ── */
+function switchTab(group, id) {
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(el => el.classList.remove('active'));
+  document.getElementById(`${group}-${id}`).classList.add('active');
+  // update tab buttons
+  const btns = document.querySelectorAll(`.tab-btn[onclick*="switchTab('${group}"]`);
+  btns.forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${id}'`));
+  });
+}
+
+/* ── Init ── */
+renderFileTable();
+renderChecklist('both');
+renderTimeline();
+renderAssets();
+updateGlobalProgress();
+</script>
+</body>
+</html>
